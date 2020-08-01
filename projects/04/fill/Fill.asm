@@ -12,3 +12,42 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+	@16384
+	D=A        //Pixel index
+	@0
+	M=D        //R0=Pixel index
+	@24576
+	D=M        //D=RAM[24576]  keybroad input
+	@WHITE
+	D;JEQ
+	@BLACK
+	D;JNE
+(WHITE)
+	@0
+	D=M       //D=R0=Pixel index
+	@i
+	M=D
+	@i
+	
+	@0
+	M=D
+	@1
+	D=D-A
+	@0
+	M=D
+	@END
+	0;JMP
+(BLACK)
+	@0
+	D=M
+	@1
+	D=A
+	@1
+	D=D+A
+	@0
+	M=D
+	@END
+	0;JMP
+(END)
+	@END
+	0;JMP
