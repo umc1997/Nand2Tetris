@@ -12,42 +12,54 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
-	@16384
+(MAIN)
+	@SCREEN
 	D=A        //Pixel index
 	@0
 	M=D        //R0=Pixel index
-	@24576
-	D=M        //D=RAM[24576]  keybroad input
+(KBDCHECK)
+	@KBD
+	D=M        //D=keybroad input
+
+	@BLACK
+	D;JGT
+
 	@WHITE
 	D;JEQ
-	@BLACK
-	D;JNE
-(WHITE)
-	@0
-	D=M       //D=R0=Pixel index
-	@i
-	M=D
-	@i
-	
-	@0
-	M=D
-	@1
-	D=D-A
-	@0
-	M=D
-	@END
+
+	@KBDCHECK
 	0;JMP
 (BLACK)
-	@0
-	D=M
 	@1
-	D=A
-	@1
-	D=D+A
-	@0
-	M=D
-	@END
+	M=-1
+	@CHANGE
 	0;JMP
-(END)
-	@END
+(WHITE)
+	@1
+	M=0
+	@CHANGE
+	0;JMP
+
+(CHANGE)
+	@1
+	D=M       //D=R1=pixel value
+
+	@0
+	A=M       //A=R0=pixel index
+	M=D       //R[A]=D  ->R[pixel index]=pixel value
+
+	@0
+	D=M+1     //D=R0+1=pixel index + 1
+
+	@KBD
+	D=A-D     //24576-16384
+
+	@0
+	M=M+1     //R0=R0+1
+	A=M
+
+	@CHANGE
+	D;JGT
+
+	@MAIN
 	0;JMP
