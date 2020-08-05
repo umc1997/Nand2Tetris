@@ -40,4 +40,48 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    
+    //Decode
+    //a means using which input while ALU calculates (a=0 -> Aregister, a=1 ->input of memory) 
+    //c1~c6=zx,nx,zy,ny,foo,no
+    //d1~d3 mean store or not data to target register or memory(d1=Aregister d2=Dregister d3=Memory[A])
+    And16(a=instruction, b=true, out[15]=i, out[13..14]=x, out[12]=a, out[11]=c1,out[10]=c2,out[9]=c3,out[8]=c4,out[7]=c5,out[6]=c6,out[5]=d1,out[4]=d2,out[3]=d3,out[2]=j1,out[1]=j2,out[0]=j3);
+
+    //Choose input address, (if i==0 choose address(instruction[1~15]) to input, else if i==1 choose forward address to input)
+    Mux16(a=instruction, b=outMin,sel=i,out=inputaddress);
+
+    //ARegister store = addressM done
+    Not(in=i,out=noti);
+    Or(a=d1,b=noti,out=loadA);
+    ARegister(in=inputaddress, load=loadA, out=A, out[0..14]=addressM);
+
+    //Choose inputvalue2 for ALU, (if a==0 choose Aregister, if a==1 choose Mregister)
+    And(a=i,b=a,out=seladdress);
+    Mux16(a=A, b=inM, sel=seladdress,out=inputValue2);
+
+    //ALU = outM done
+    ALU(x=D, y=inputValue2, zx=c1,nx=c2,zy=c3,ny=c4,f=c5,no=c6, out=outM,out=outMin ,zr=zr,ng=ng);
+
+    //Dregister store
+    And(a=i,b=d2,out=loadD);
+    DRegister(in=outMin,load=loadD,out=D); 
+
+    //writeM done
+    And(a=i,b=d3,out=writeM);
+    
+    //Jump statement
+    Not(in=ng,out=pg);
+    Not(in=zr,out=nzr);
+    And(a=j1,b=i,out=j1i);
+    And(a=j2,b=i,out=j2i);
+    And(a=j3,b=i,out=j3i);
+    And(a=j1i,b=ng,out=j1true);
+    And(a=j2i,b=zr,out=j2true);
+    And(a=j3i,b=pg,out=j3truetmp);
+    And(a=j3truetmp, b=nzr, out=j3true);
+    Or(a=j1true,b=j2true, out=j1j2true);
+    Or(a=j1j2true,b=j3true, out=jumpstate);
+
+    //pc done
+    PC(in=A, load=jumpstate,inc=true,reset=reset,out[0..14]=pc);
 }
