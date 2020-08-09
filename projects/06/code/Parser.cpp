@@ -43,60 +43,54 @@ void Parser::advance() {
 		lineNumber++;
 		trimLeft(s);
 	} while (isComment(s) || s.empty());
-	
+
 	trimRight(s);
 	currentCommand = s;
-
-	//hasMoreCommands();
 }
-Command Parser::commandType() 
+Command Parser::commandType() const
 {
-	bool isA = currentCommand.find("@");
-	bool isC = currentCommand.find("=");
-	bool isL1 = currentCommand.find("(");
-	bool isL2 = currentCommand.find(")");
-	if (isA == 0 && isA != string::npos)
+	if (currentCommand.find("@") == 0)
 	{
 		return A_COMMAND;
 	}
-	else if (isC != string::npos)
-	{
-		return C_COMMAND;
-	}
-	else if (isL1 != string::npos && !isL1 != string::npos)
+	else if (currentCommand.find("(") != string::npos)
 	{
 		return L_COMMAND;
 	}
+	else
+	{
+		return C_COMMAND;
+	}
 }
-string Parser::symbol() {
+string Parser::symbol() const {
 	string s = currentCommand;
-	s.erase(0,1);
+	s.erase(0, 1);
 	if (s.find(")") != string::npos)
 	{
 		s.erase(s.find(")"));
 	}
 	return s;
 }
-string Parser::dest() {
+string Parser::dest() const {
 	string s = currentCommand;
 	if (s.find("=") != string::npos)
 	{
-		return s.substr(0, s.find("="));
+		return s.erase(s.find("="),string::npos);
 
 	}
 	else
 	{
 		return "";
 	}
-	
+
 }
-string Parser::comp() {
+string Parser::comp() const {
 	string s = currentCommand;
 
 	size_t end = s.find(";");
 	if (end != string::npos)
 	{
-		s.erase(end , string::npos);
+		s.erase(end, string::npos);
 	}
 	size_t begin = s.find("=");
 	if (begin != string::npos)
@@ -105,13 +99,12 @@ string Parser::comp() {
 	}
 	return s;
 }
-string Parser::jump() {
+string Parser::jump() const {
 	string s = currentCommand;
 	if (s.find(";") != string::npos)
 	{
 		s.erase(0, s.find(";") + 1);
 		return s;
-
 	}
 	else
 	{
@@ -121,12 +114,12 @@ string Parser::jump() {
 
 void Parser::trimLeft(string& line)
 {
-	const string blank = "\t\n\f\v\r";
+	const string blank = " \t\n\f\v\r";
 	line.erase(0, line.find_first_not_of(blank));
 }
 void Parser::trimRight(string& line)
 {
-	const string blank = "\t\n\f\v\r";
+	const string blank = " \t\n\f\v\r";
 	int commentPos = line.find("//");
 	if (commentPos != 0 && commentPos != string::npos)
 	{
@@ -137,4 +130,8 @@ void Parser::trimRight(string& line)
 bool Parser::isComment(string& line)
 {
 	return line.find("//") == 0;
+}
+int Parser::getLineNumber()
+{
+	return lineNumber;
 }

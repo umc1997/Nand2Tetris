@@ -1,72 +1,92 @@
 #include "Assembler.h"
-#include "Parser.h"
 
-Assembler::Assembler(const string& inputFilename)
+Assembler::Assembler(const string& inputFilename, SymbolTable& mySymbolTable)
+:mySymbolTable(mySymbolTable)
 {
 	this->inputFilename = inputFilename;
+
+	Parser myParser1(inputFilename);
+	Parser myParser2(inputFilename);
+
+	uint16_t ROMaddress = 0x0;
+	uint16_t RAMaddress = 0x10;
+	
+	//1-pass
+	while (myParser1.hasMoreCommands())
+	{
+
+		myParser1.advance();
+		Command commandType = myParser1.commandType();
+
+		if (commandType == A_COMMAND || commandType == C_COMMAND)
+		{
+			ROMaddress++;
+		}
+		if (commandType == L_COMMAND)
+		{
+			mySymbolTable.addEntry(myParser1.symbol(), ROMaddress);
+		}
+	}
+	//2-pass
+	while (myParser2.hasMoreCommands())
+	{
+		myParser2.advance();
+		if (myParser2.commandType() == A_COMMAND)
+		{
+			string s = myParser2.symbol();
+			if (!isdigit(s.front()) && !mySymbolTable.contains(s))
+			{
+				mySymbolTable.addEntry(s, RAMaddress);
+				RAMaddress++;
+			}
+		}
+	}
 }
 
 void Assembler::Assembly(ostream& outputFile) const
 {
-	Parser myParser(inputFilename);
-	// translate
-	while (myParser.hasMoreCommands())
-	{
-		myParser.advance();
-		Command commandType = myParser.commandType();
-		string finalCode = "";
-		if (commandType == A_COMMAND)
-		{
-			finalCode.append("0");
-			string s = myParser.symbol();
-			int digit = atoi(s.c_str());
-			//digit
-			if (digit != 0 || s.compare("0") == 0)
-			{
-				bitset<15> bit(digit);
-				finalCode.append(bit.to_string());
-			}
-			//symbol
-			else
-			{
-				finalCode.append("Need to modify");
-				//Need to modify
-			}
-		}
-		else if (commandType == C_COMMAND)
-		{
-			finalCode.append("111");
-			Code myCode;
-			string destString;
-			string destCode;
-			string a = "0";
-			string compString;
-			string compCode;
-			string jumpString;
-			string jumpCode;
-			//dest
-			destString = myParser.dest();
-			destCode = myCode.dest(destString);
-			//comp
-			compString = myParser.comp();
-			if (compString.find("M") != string::npos)
-			{
-				a = "1";
-			}
-			compCode = myCode.comp(compString);
-			//jump
-			jumpString = myParser.jump();
-			jumpCode = myCode.jump(jumpString);
-			finalCode.append(a + compCode + destCode + jumpCode);
+	Parser p(inputFilename);
+	Code c;
 
-		}
-		else if (commandType == L_COMMAND)
+	while (p.hasMoreCommands())
+	{
+		p.advance();
+		Command commandType = p.commandType();
+		switch (commandType)
 		{
-			//Need to Modify
+			case(A_COMMAND):
+			{
+				string s = p.symbol();
+				bitset<16> finalbit;
+				//digit
+				if (isdigit(s.front()))
+				{
+					finalbit = stoi(s);
+				}
+				//symbol
+				else
+				{
+					finalbit = mySymbolTable.GetAddress(s);
+				}
+				outputFile << bitset<16>(finalbit) << endl;
+				break;
+			}
+			case(C_COMMAND): {
+				bitset<16> finalbit;
+
+				bitset<16>  dest = c.dest(p.dest());
+				bitset<16>  comp = c.comp(p.comp());
+				bitset<16>  jump = c.jump(p.jump());
+			
+				finalbit = comp | dest | jump;
+
+				outputFile << finalbit << endl;
+				break;
+			}
+			case(L_COMMAND):
+				break;
 		}
-		outputFile << finalCode << endl;
-		cout << finalCode << endl;
-		//write in file
+
 	}
-	
 }
+
