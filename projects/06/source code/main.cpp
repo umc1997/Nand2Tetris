@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	if (argc <= 1 || argc > 3) {
-		cout << "Error, It needs 2 argv for assembler." << endl;
+		cout << "Error, It needs 2 or 3 argv for assembler." << endl;
 		return -1;
 	}
 	string outputFilename;
