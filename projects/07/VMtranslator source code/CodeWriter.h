@@ -24,4 +24,5 @@ private:
 	string filename;
 	string currentCommand;
 	stack<uint16_t> Stack;
+	int LABEL_NUMBER;
 };

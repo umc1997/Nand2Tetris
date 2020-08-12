@@ -1,8 +1,9 @@
 #include "CodeWriter.h"
 
 CodeWriter::CodeWriter(ofstream& outputFile)
-:outputFile(outputFile)
-{}
+:outputFile(outputFile),LABEL_NUMBER(0)
+{
+}
 void CodeWriter::setFileName(string& filename)
 {
 	outputFile << "//Start translating a new vm File: " << filename << endl;
@@ -20,13 +21,13 @@ void CodeWriter::writerArithmetic(const string& command)
 	{
 		result = ~y + 1;
 		outputFile << "@" << to_string(indexofY) << endl;
-		outputFile << "M=-M" << endl;
+		outputFile << "D=-M" << endl;
 	}
 	else if (command == "not")
 	{
 		result = ~y;
 		outputFile << "@" << to_string(indexofY) << endl;
-		outputFile << "M=!M" << endl;
+		outputFile << "D=!M" << endl;
 	}
 	else
 	{
@@ -51,6 +52,19 @@ void CodeWriter::writerArithmetic(const string& command)
 		}
 		if (command == "eq")
 		{
+			outputFile << "@" << to_string(indexofX) << endl;
+			outputFile << "D=M" << endl;
+			outputFile << "@" << to_string(indexofY) << endl;
+			outputFile << "D=D-M" << endl;
+			outputFile << "@EQ" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "D;JEQ" << endl;
+			outputFile << "D=0" << endl;
+			outputFile << "@END" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "0;JMP" << endl;
+			outputFile << "(EQ" << to_string(LABEL_NUMBER) << ")" << endl;
+			outputFile << "D=-1" << endl;
+			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
+			LABEL_NUMBER++;
 			if (x == y)
 				result = 0xFFFF;
 			else
@@ -58,6 +72,19 @@ void CodeWriter::writerArithmetic(const string& command)
 		}
 		if (command == "gt")
 		{
+			outputFile << "@" << to_string(indexofX) << endl;
+			outputFile << "D=M" << endl;
+			outputFile << "@" << to_string(indexofY) << endl;
+			outputFile << "D=D-M" << endl;
+			outputFile << "@GT" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "D;JGT" << endl;
+			outputFile << "D=0" << endl;
+			outputFile << "@END" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "0;JMP" << endl;
+			outputFile << "(GT" << to_string(LABEL_NUMBER) << ")" << endl;
+			outputFile << "D=-1" << endl;
+			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
+			LABEL_NUMBER++;
 			if (x > y)
 				result = 0xFFFF;
 			else
@@ -65,6 +92,19 @@ void CodeWriter::writerArithmetic(const string& command)
 		}
 		if (command == "lt")
 		{
+			outputFile << "@" << to_string(indexofX) << endl;
+			outputFile << "D=M" << endl;
+			outputFile << "@" << to_string(indexofY) << endl;
+			outputFile << "D=D-M" << endl;
+			outputFile << "@LT" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "D;JLT" << endl;
+			outputFile << "D=0" << endl;
+			outputFile << "@END" << to_string(LABEL_NUMBER) << endl;
+			outputFile << "0;JMP" << endl;
+			outputFile << "(LT" << to_string(LABEL_NUMBER) << ")" << endl;
+			outputFile << "D=-1" << endl;
+			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
+			LABEL_NUMBER++;
 			if (x < y)
 				result = 0xFFFF;
 			else
@@ -72,10 +112,18 @@ void CodeWriter::writerArithmetic(const string& command)
 		}
 		if (command == "and")
 		{
+			outputFile << "@" << to_string(indexofX) << endl;
+			outputFile << "D=M" << endl;
+			outputFile << "@" << to_string(indexofY) << endl;
+			outputFile << "D=D&M" << endl;
 			result = x & y;
 		}
 		if (command == "or")
 		{
+			outputFile << "@" << to_string(indexofX) << endl;
+			outputFile << "D=M" << endl;
+			outputFile << "@" << to_string(indexofY) << endl;
+			outputFile << "D=D|M" << endl;
 			result = x | y;
 		}
 	}
@@ -102,7 +150,6 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 			uint16_t pop = Stack.top();
 			Stack.pop();
 			writePop(index);
-
 
 		}
 		else {} //symbol
