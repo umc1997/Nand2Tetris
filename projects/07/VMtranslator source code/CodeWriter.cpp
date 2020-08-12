@@ -10,37 +10,30 @@ void CodeWriter::setFileName(string& filename)
 }
 void CodeWriter::writerArithmetic(const string& command) 
 {
-	uint16_t result;
-	uint16_t indexofX = 0x0005; //test
-	uint16_t indexofY = 0x0006; //test
-	uint16_t y = Stack.top();
-	Stack.pop();
-	writePop(indexofY);
+	uint16_t indexofX = 0x000D; //test
+	uint16_t indexofY = 0x000E; //test
+
+	writePop(indexofY,false);
 
 	if (command == "neg")
 	{
-		result = ~y + 1;
 		outputFile << "@" << to_string(indexofY) << endl;
 		outputFile << "D=-M" << endl;
 	}
 	else if (command == "not")
 	{
-		result = ~y;
 		outputFile << "@" << to_string(indexofY) << endl;
 		outputFile << "D=!M" << endl;
 	}
 	else
 	{
-		uint16_t x = Stack.top();
-		Stack.pop();
-		writePop(indexofX);
+		writePop(indexofX,false);
 		if (command == "add")
 		{
 			outputFile << "@" << to_string(indexofX) << endl;
 			outputFile << "D=M" << endl;
 			outputFile << "@" << to_string(indexofY) << endl;
 			outputFile << "D=D+M" << endl;
-			result = x + y;
 		}
 		if (command == "sub")
 		{
@@ -48,7 +41,6 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=M" << endl;
 			outputFile << "@" << to_string(indexofY) << endl;
 			outputFile << "D=D-M" << endl;
-			result = x - y;
 		}
 		if (command == "eq")
 		{
@@ -65,10 +57,6 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=-1" << endl;
 			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
 			LABEL_NUMBER++;
-			if (x == y)
-				result = 0xFFFF;
-			else
-				result = 0x0000;
 		}
 		if (command == "gt")
 		{
@@ -85,10 +73,6 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=-1" << endl;
 			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
 			LABEL_NUMBER++;
-			if (x > y)
-				result = 0xFFFF;
-			else
-				result = 0x0000;
 		}
 		if (command == "lt")
 		{
@@ -105,10 +89,6 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=-1" << endl;
 			outputFile << "(END" << to_string(LABEL_NUMBER) << ")" << endl;
 			LABEL_NUMBER++;
-			if (x < y)
-				result = 0xFFFF;
-			else
-				result = 0x0000;
 		}
 		if (command == "and")
 		{
@@ -116,7 +96,6 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=M" << endl;
 			outputFile << "@" << to_string(indexofY) << endl;
 			outputFile << "D=D&M" << endl;
-			result = x & y;
 		}
 		if (command == "or")
 		{
@@ -124,10 +103,8 @@ void CodeWriter::writerArithmetic(const string& command)
 			outputFile << "D=M" << endl;
 			outputFile << "@" << to_string(indexofY) << endl;
 			outputFile << "D=D|M" << endl;
-			result = x | y;
 		}
 	}
-	Stack.push(result);
 	writePush();
 }
 void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
@@ -136,23 +113,132 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 	{
 		if (segment == "constant")
 		{
-			Stack.push(index);
 			outputFile << "@" << to_string(index) << endl;
 			outputFile << "D=A" << endl;
 			writePush();
 		}
-		else{}//symbol
+		else{
+			if (segment == "local")
+			{
+				outputFile << "@LCL" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "A=D+A" << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if(segment == "argument")
+			{ 
+				outputFile << "@ARG" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "A=D+A" << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if (segment == "this")
+			{
+				outputFile << "@THIS" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "A=D+A" << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if (segment == "that")
+			{
+				outputFile << "@THAT" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "A=D+A" << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if (segment == "pointer")
+			{
+				outputFile << "@" << to_string(POINTER_ADDRESS + index) << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if (segment == "temp")
+			{
+				outputFile << "@" << to_string(TEMP_ADDRESS + index) << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+			else if (segment == "static")
+			{
+				outputFile << "@" << filename << "." << to_string(index) << endl;
+				outputFile << "D=M" << endl;
+				writePush();
+			}
+		}//symbol
 	}
 	if (command == C_POP)
 	{
 		if (segment == "constant")
 		{
-			uint16_t pop = Stack.top();
-			Stack.pop();
-			writePop(index);
-
+			//
 		}
-		else {} //symbol
+		else {
+			uint16_t tmp = 0x000D;
+			if (segment == "local")
+			{
+				outputFile << "@LCL" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "D=D+A" << endl;
+				outputFile << "@" << to_string(tmp) << endl;
+				outputFile << "M=D" << endl;
+				writePop(tmp,true);
+			}
+			else if (segment == "argument")
+			{
+				outputFile << "@ARG" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "D=D+A" << endl;
+				outputFile << "@" << to_string(tmp) << endl;
+				outputFile << "M=D" << endl;
+				writePop(tmp, true);
+			}
+			else if (segment == "this")
+			{
+				outputFile << "@THIS" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "D=D+A" << endl;
+				outputFile << "@" << to_string(tmp) << endl;
+				outputFile << "M=D" << endl;
+				writePop(tmp, true);
+			}
+			else if (segment == "that")
+			{
+				outputFile << "@THAT" << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(index) << endl;
+				outputFile << "D=D+A" << endl;
+				outputFile << "@" << to_string(tmp) << endl;
+				outputFile << "M=D" << endl;
+				writePop(tmp, true);
+			}
+			else if (segment == "pointer")
+			{
+				writePop(POINTER_ADDRESS + index, false);
+			}
+			else if (segment == "temp")
+			{
+				writePop(TEMP_ADDRESS + index, false);
+			}
+			else if (segment == "static")
+			{
+				outputFile << "@" << filename << "." << to_string(index) << endl;
+				outputFile << "D=M" << endl;
+				outputFile << "@" << to_string(tmp) << endl;
+				outputFile << "M=D" << endl;
+				writePop(tmp,true);
+			}
+		}//symbol
 	}
 }
 void CodeWriter::Close() 
@@ -160,6 +246,7 @@ void CodeWriter::Close()
 	outputFile.close();
 }
 
+// D = constant for push
 void CodeWriter::writePush() {
 	outputFile << "@SP" << endl;
 	outputFile << "A=M" << endl;
@@ -168,12 +255,15 @@ void CodeWriter::writePush() {
 	outputFile << "M=M+1" << endl;
 }
 //R[index] = pop()
-void CodeWriter::writePop(int index){
+//isAddress = (Is index means memory address?)
+void CodeWriter::writePop(int index, bool isAddress){
 	outputFile << "@SP" << endl;
 	outputFile << "AM=M-1" << endl;
 	outputFile << "D=M" << endl;
-
+	outputFile << "M=0" << endl;
 	outputFile << "@" << to_string(index) << endl;
+	if (isAddress)
+		outputFile << "A=M" << endl;
 	outputFile << "M=D" << endl;
 
 }

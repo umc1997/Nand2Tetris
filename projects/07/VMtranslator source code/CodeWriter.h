@@ -17,12 +17,13 @@ public:
 	void writePushPop(COMMAND command, const string& segment, int index);
 	void Close();
 	void writePush();
-	void writePop(int index);
+	void writePop(int index,bool isAddress);
 
 private:
 	ofstream& outputFile;
 	string filename;
 	string currentCommand;
-	stack<uint16_t> Stack;
 	int LABEL_NUMBER;
+	const int POINTER_ADDRESS = 3;
+	const int TEMP_ADDRESS = 5;
 };

@@ -16,9 +16,6 @@ void VMtranslator::translate(ofstream& outputFile)
 	do
 	{
 		p.advance();
-		/*cout << "Commandtype: "<< p.commandType() << endl;
-		cout << "arg1: " << p.arg1() << endl;
-		cout << "arg2: " << p.arg2() << endl;*/
 		switch (p.commandType())
 		{
 		case(C_ARITHMETIC):
