@@ -1,4 +1,4 @@
-//Start translating a new vm File: Test.vm
+//Start translating a new vm File: PointerTest.vm
 @3030
 D=A
 @SP

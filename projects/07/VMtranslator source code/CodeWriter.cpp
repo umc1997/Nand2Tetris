@@ -1,11 +1,13 @@
 #include "CodeWriter.h"
 
-CodeWriter::CodeWriter(ofstream& outputFile)
-:outputFile(outputFile),LABEL_NUMBER(0)
+CodeWriter::CodeWriter(string& outputFileName)
+:outputFileName(outputFileName),LABEL_NUMBER(0)
 {
+	outputFile.open(outputFileName.append(".asm"));
 }
 void CodeWriter::setFileName(string& filename)
 {
+	this->currentFileName = filename.substr(0, filename.find_last_of("."));
 	outputFile << "//Start translating a new vm File: " << filename << endl;
 }
 void CodeWriter::writerArithmetic(const string& command) 
@@ -168,7 +170,7 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 			}
 			else if (segment == "static")
 			{
-				outputFile << "@" << filename << "." << to_string(index) << endl;
+				outputFile << "@" << currentFileName << "." << to_string(index) << endl;
 				outputFile << "D=M" << endl;
 				writePush();
 			}
@@ -232,8 +234,8 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 			}
 			else if (segment == "static")
 			{
-				outputFile << "@" << filename << "." << to_string(index) << endl;
-				outputFile << "D=M" << endl;
+				outputFile << "@" << currentFileName << "." << to_string(index) << endl;
+				outputFile << "D=A" << endl;
 				outputFile << "@" << to_string(tmp) << endl;
 				outputFile << "M=D" << endl;
 				writePop(tmp,true);
@@ -254,15 +256,15 @@ void CodeWriter::writePush() {
 	outputFile << "@SP" << endl;
 	outputFile << "M=M+1" << endl;
 }
-//R[index] = pop()
-//isAddress = (Is index means memory address?)
-void CodeWriter::writePop(int index, bool isAddress){
+//R[address] = pop()
+//needAccessRAM = ?(@R[index]=address : @index = address)
+void CodeWriter::writePop(int index, bool needAccessRAM){
 	outputFile << "@SP" << endl;
 	outputFile << "AM=M-1" << endl;
 	outputFile << "D=M" << endl;
 	outputFile << "M=0" << endl;
 	outputFile << "@" << to_string(index) << endl;
-	if (isAddress)
+	if (needAccessRAM)
 		outputFile << "A=M" << endl;
 	outputFile << "M=D" << endl;
 

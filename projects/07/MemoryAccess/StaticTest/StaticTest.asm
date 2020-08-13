@@ -1,4 +1,4 @@
-//Start translating a new vm File: Test.vm
+//Start translating a new vm File: StaticTest.vm
 @111
 D=A
 @SP
@@ -21,7 +21,7 @@ M=D
 @SP
 M=M+1
 @StaticTest.8
-D=M
+D=A
 @13
 M=D
 @SP
@@ -32,7 +32,7 @@ M=0
 A=M
 M=D
 @StaticTest.3
-D=M
+D=A
 @13
 M=D
 @SP
@@ -43,7 +43,7 @@ M=0
 A=M
 M=D
 @StaticTest.1
-D=M
+D=A
 @13
 M=D
 @SP

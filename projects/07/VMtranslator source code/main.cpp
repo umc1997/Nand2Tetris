@@ -4,23 +4,14 @@
 
 using namespace std;
 
-//int main(int argc, char* argv[]) 
-int main()
+int main(int argc, char* argv[]) 
 {
 	string inputPathName;
-
-	string outputFileName;
-	ofstream outputFile;
-	//cout << argc << endl;
-
-	inputPathName = "Test.vm";//argv[1];
-	outputFileName = "Test.asm"; //argv[2];
-	outputFile.open(outputFileName, ifstream::out);
+	inputPathName = argv[1];
 
 	VMtranslator myVM(inputPathName);
 
-	myVM.translate(outputFile);
+	myVM.translate();
 
 	return 0;
 }
-// input system 

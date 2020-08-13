@@ -1,4 +1,4 @@
-//Start translating a new vm File: Test.vm
+//Start translating a new vm File: BasicTest.vm
 @10
 D=A
 @SP
