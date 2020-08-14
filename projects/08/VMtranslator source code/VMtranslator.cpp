@@ -18,7 +18,7 @@ void VMtranslator::translate()
 		currentInputFileName = pathName;
 		Parser p(currentInputFileName);
 		c.setFileName(currentInputFileName);
-		while (p.hasMoreCommands())
+		do
 		{
 			p.advance();
 			switch (p.commandType())
@@ -31,7 +31,7 @@ void VMtranslator::translate()
 				c.writePushPop(p.commandType(),p.arg1(),p.arg2());
 				break;
 			}
-		} 
+		} while (p.hasMoreCommands());
 	}
 	else if (inputExtension == "")
 	{
