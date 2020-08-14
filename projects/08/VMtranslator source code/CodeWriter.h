@@ -15,7 +15,15 @@ public:
 	void setFileName(string& filename);
 	void writerArithmetic(const string& command);
 	void writePushPop(COMMAND command, const string& segment, int index);
+	void writetInit();
+	void writeLabel(const string& label);
+	void writeGoto(const string& label);
+	void writeIf(const string& label);
+	void writeCall(const string& functionName, int numArgs);
+	void writeReturn();
+	void writeFunction(const string& functionName, int numLocals);
 	void Close();
+
 	void writePush();
 	void writePop(int index,bool needAccessRAM);
 

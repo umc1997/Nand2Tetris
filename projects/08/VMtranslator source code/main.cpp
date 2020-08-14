@@ -10,7 +10,6 @@ int main(int argc, char* argv[])
 	inputPathName = argv[1];
 
 	VMtranslator myVM(inputPathName);
-
 	myVM.translate();
 
 	return 0;

@@ -15,10 +15,11 @@ void VMtranslator::translate()
 	{
 		string s = removeExtension(pathName);
 		CodeWriter c(s);
+		c.writetInit();
 		currentInputFileName = pathName;
 		Parser p(currentInputFileName);
 		c.setFileName(currentInputFileName);
-		do
+		while (p.hasMoreCommands())
 		{
 			p.advance();
 			switch (p.commandType())
@@ -28,16 +29,37 @@ void VMtranslator::translate()
 				break;
 			case(C_PUSH):
 			case(C_POP):
-				c.writePushPop(p.commandType(),p.arg1(),p.arg2());
+				c.writePushPop(p.commandType(), p.arg1(), p.arg2());
+				break;
+			case(C_LABEL):
+				c.writeLabel(p.arg1());
+				break;
+			case(C_GOTO):
+				c.writeGoto(p.arg1());
+				break;
+			case(C_IF):
+				c.writeIf(p.arg1());
+				break;
+			case(C_CALL):
+				c.writeCall(p.arg1(), p.arg2());
+				break;
+			case(C_RETURN):
+				c.writeReturn();
+				break;
+			case(C_FUNCTION):
+				c.writeFunction(p.arg1(), p.arg2());
 				break;
 			}
-		} while (p.hasMoreCommands());
+		}
+
+		c.Close();
 	}
 	else if (inputExtension == "")
 	{
 		fs::path myPath(pathName);
 		string s = myPath.string();
 		CodeWriter c(s);
+		c.writetInit();
 		for (auto& i : fs::recursive_directory_iterator(myPath))
 		{
 			currentInputFileName = i.path().filename().string();
@@ -57,10 +79,29 @@ void VMtranslator::translate()
 				case(C_POP):
 					c.writePushPop(p.commandType(), p.arg1(), p.arg2());
 					break;
+				case(C_LABEL):
+					c.writeLabel(p.arg1());
+					break;
+				case(C_GOTO):
+					c.writeGoto(p.arg1());
+					break;
+				case(C_IF):
+					c.writeIf(p.arg1());
+					break;
+				case(C_CALL):
+					c.writeCall(p.arg1(), p.arg2());
+					break;
+				case(C_RETURN):
+					c.writeReturn();
+					break;
+				case(C_FUNCTION):
+					c.writeFunction(p.arg1(), p.arg2());
+					break;
 				}
 			} 
 
 		}
+		c.Close();
 	}
 	else
 	{

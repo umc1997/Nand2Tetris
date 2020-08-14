@@ -243,6 +243,42 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 		}//symbol
 	}
 }
+void CodeWriter::writetInit(){
+	outputFile << "@256" << endl;
+	outputFile << "D=A" << endl;
+	outputFile << "@SP" << endl;
+	outputFile << "M=D" << endl;
+	writeCall("Sys.init", 0);
+}
+void CodeWriter::writeLabel(const string& label){
+	outputFile << "(" << label << ")" << endl;
+}
+void CodeWriter::writeGoto(const string& label){
+	outputFile << "@" << label << endl;	
+	outputFile << "0;JMP" << endl;
+}
+void CodeWriter::writeIf(const string& label) {
+	outputFile << "@SP" << endl;
+	outputFile << "AM=M-1" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@" << label << endl;
+	outputFile << "D;JNE" << endl;
+}
+void CodeWriter::writeCall(const string& functionName, int numArgs) {
+	////TODO: push return-address, LCL,ARG,THIS,THAT, reset ARG,LCL
+	writeGoto(functionName);
+	string labelName = "return-address-of-";
+	labelName.append(functionName);
+	writeLabel(labelName);
+}
+void CodeWriter::writeReturn(){
+	//TODO
+}
+void CodeWriter::writeFunction(const string& functionName, int numLocals){
+	//TODO
+}
+
+
 void CodeWriter::Close() 
 {
 	outputFile.close();
