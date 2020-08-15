@@ -4,10 +4,12 @@ CodeWriter::CodeWriter(string& outputFileName)
 :outputFileName(outputFileName),LABEL_NUMBER(0)
 {
 	outputFile.open(outputFileName.append(".asm"));
+	currentFunctionName = "";
 }
 void CodeWriter::setFileName(string& filename)
 {
 	this->currentFileName = filename.substr(0, filename.find_last_of("."));
+	currentFunctionName = "";
 	outputFile << "//Start translating a new vm File: " << filename << endl;
 }
 void CodeWriter::writerArithmetic(const string& command) 
@@ -251,31 +253,122 @@ void CodeWriter::writetInit(){
 	writeCall("Sys.init", 0);
 }
 void CodeWriter::writeLabel(const string& label){
+	outputFile << currentFunctionName;
 	outputFile << "(" << label << ")" << endl;
 }
 void CodeWriter::writeGoto(const string& label){
-	outputFile << "@" << label << endl;	
+	outputFile << "@" << currentFunctionName << label << endl;
 	outputFile << "0;JMP" << endl;
 }
 void CodeWriter::writeIf(const string& label) {
 	outputFile << "@SP" << endl;
 	outputFile << "AM=M-1" << endl;
 	outputFile << "D=M" << endl;
-	outputFile << "@" << label << endl;
+	outputFile << "@" << currentFunctionName << label << endl;
 	outputFile << "D;JNE" << endl;
 }
 void CodeWriter::writeCall(const string& functionName, int numArgs) {
-	////TODO: push return-address, LCL,ARG,THIS,THAT, reset ARG,LCL
-	writeGoto(functionName);
 	string labelName = "return-address-of-";
 	labelName.append(functionName);
+	//push return-address
+	outputFile << "@" << labelName << endl;
+	outputFile << "D=M" << endl;
+	writePush();
+	//push LCL
+	outputFile << "@LCL" << endl;
+	outputFile << "D=M" << endl;
+	writePush();
+	//push ARG
+	outputFile << "@ARG" << endl;
+	outputFile << "D=M" << endl;
+	writePush();
+	//push THIS
+	outputFile << "@THIS" << endl;
+	outputFile << "D=M" << endl;
+	writePush();
+	//push THAT
+	outputFile << "@THAT" << endl;
+	outputFile << "D=M" << endl;
+	writePush();
+	//reset ARG
+	outputFile << "@SP" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@" << to_string(numArgs) << endl;
+	outputFile << "D=D-A" << endl;
+	outputFile << "@5" << endl;
+	outputFile << "D=D-A" << endl;
+	outputFile << "@ARG" << endl;
+	outputFile << "M=D" << endl;
+	//reset LCL
+	outputFile << "@SP" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@LCL" << endl;
+	outputFile << "M=D" << endl;
+
+	writeGoto(functionName);
+
 	writeLabel(labelName);
 }
 void CodeWriter::writeReturn(){
 	//TODO
+	string RET = "return-address-of-";
+	RET.append(currentfunctionName);
+	//FRAME = LCL
+	outputFile << "@LCL" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@FRAME" << endl;
+	outputFile << "M=D" << endl;
+	//RET = *(FRAME-5)
+	outputFile << "@5" << endl;
+	outputFile << "A=D-A" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@" << RET << endl;
+	outputFile << "M=D" << endl;
+	//*ARG = pop()
+	writePop(2, true);
+	//SP = ARG+1
+	outputFile << "@ARG" << endl;
+	outputFile << "D=M+1" << endl;
+	outputFile << "@SP" << endl;
+	outputFile << "M=D" << endl;
+	//THAT = *(FRAME-1)
+	outputFile << "@FRAME" << endl;
+	outputFile << "AM=M-1" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@THAT" << endl;
+	outputFile << "M=D" << endl;
+	//THIS = *(FRAME-2)
+	outputFile << "@FRAME" << endl;
+	outputFile << "AM=M-1" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@THIS" << endl;
+	outputFile << "M=D" << endl;
+	//ARG = *(FRAME-3)
+	outputFile << "@FRAME" << endl;
+	outputFile << "AM=M-1" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@ARG" << endl;
+	outputFile << "M=D" << endl;
+	//LCL = *(FRAME-4)
+	outputFile << "@FRAME" << endl;
+	outputFile << "AM=M-1" << endl;
+	outputFile << "D=M" << endl;
+	outputFile << "@LCL" << endl;
+	outputFile << "M=D" << endl;
+	//goto RET
+	writeGoto(RET);
 }
 void CodeWriter::writeFunction(const string& functionName, int numLocals){
-	//TODO
+
+	writeLabel(functionName);
+	currentFunctionName = functionName;
+	currentFunctionName.append("$");
+	for (int i = 0; i < numLocals; i++)
+	{
+		outputFile << "D=0" << endl;
+		writePushPop(C_PUSH, "local", i);
+	}
+
 }
 
 

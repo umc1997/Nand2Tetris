@@ -33,6 +33,7 @@ private:
 	string currentFileName;
 	string currentCommand;
 	int LABEL_NUMBER;
+	string currentFunctionName;
 	const int POINTER_ADDRESS = 3;
 	const int TEMP_ADDRESS = 5;
 };

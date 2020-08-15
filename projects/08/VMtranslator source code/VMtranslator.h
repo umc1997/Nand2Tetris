@@ -18,5 +18,5 @@ private:
 	string pathName;
 	string getExtension(const string& fileName);
 	string removeExtension(string& fileName);
-
+	
 };
