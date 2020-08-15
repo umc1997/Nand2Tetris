@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class VMtranslator 
+class VMtranslator
 {
 public:
 	VMtranslator(const string& pathName);
