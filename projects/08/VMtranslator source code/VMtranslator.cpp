@@ -15,7 +15,7 @@ void VMtranslator::translate()
 	{
 		string s = removeExtension(pathName);
 		CodeWriter c(s);
-		c.writetInit();
+		//c.writetInit();
 		currentInputFileName = pathName;
 		Parser p(currentInputFileName);
 		c.setFileName(currentInputFileName);
@@ -65,7 +65,7 @@ void VMtranslator::translate()
 			currentInputFileName = i.path().filename().string();
 			if (getExtension(currentInputFileName) != "vm")
 				continue;
-			Parser p(i.path().string()); 
+			Parser p(i.path().string());
 			c.setFileName(currentInputFileName);
 			while (p.hasMoreCommands())
 			{
@@ -98,7 +98,7 @@ void VMtranslator::translate()
 					c.writeFunction(p.arg1(), p.arg2());
 					break;
 				}
-			} 
+			}
 
 		}
 		c.Close();
@@ -107,9 +107,6 @@ void VMtranslator::translate()
 	{
 		cout << "Error: Extension is wrong" << endl;
 	}
-	//while(file number)
-	
-	//
 }
 
 string VMtranslator::getExtension(const string& fileName)

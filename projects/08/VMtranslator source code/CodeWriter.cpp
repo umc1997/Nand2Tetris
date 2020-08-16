@@ -1,23 +1,21 @@
 #include "CodeWriter.h"
 
 CodeWriter::CodeWriter(string& outputFileName)
-:outputFileName(outputFileName),LABEL_NUMBER(0)
+	:outputFileName(outputFileName), LABEL_NUMBER(0)
 {
 	outputFile.open(outputFileName.append(".asm"));
-	currentFunctionName = "";
 }
 void CodeWriter::setFileName(string& filename)
 {
 	this->currentFileName = filename.substr(0, filename.find_last_of("."));
-	currentFunctionName = "";
 	outputFile << "//Start translating a new vm File: " << filename << endl;
 }
-void CodeWriter::writerArithmetic(const string& command) 
+void CodeWriter::writerArithmetic(const string& command)
 {
 	uint16_t indexofX = 0x000D; //test
 	uint16_t indexofY = 0x000E; //test
 
-	writePop(indexofY,false);
+	writePop(indexofY, false);
 
 	if (command == "neg")
 	{
@@ -31,7 +29,7 @@ void CodeWriter::writerArithmetic(const string& command)
 	}
 	else
 	{
-		writePop(indexofX,false);
+		writePop(indexofX, false);
 		if (command == "add")
 		{
 			outputFile << "@" << to_string(indexofX) << endl;
@@ -121,7 +119,7 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 			outputFile << "D=A" << endl;
 			writePush();
 		}
-		else{
+		else {
 			if (segment == "local")
 			{
 				outputFile << "@LCL" << endl;
@@ -131,8 +129,8 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 				outputFile << "D=M" << endl;
 				writePush();
 			}
-			else if(segment == "argument")
-			{ 
+			else if (segment == "argument")
+			{
 				outputFile << "@ARG" << endl;
 				outputFile << "D=M" << endl;
 				outputFile << "@" << to_string(index) << endl;
@@ -194,7 +192,7 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 				outputFile << "D=D+A" << endl;
 				outputFile << "@" << to_string(tmp) << endl;
 				outputFile << "M=D" << endl;
-				writePop(tmp,true);
+				writePop(tmp, true);
 			}
 			else if (segment == "argument")
 			{
@@ -240,39 +238,41 @@ void CodeWriter::writePushPop(COMMAND command, const string& segment, int index)
 				outputFile << "D=A" << endl;
 				outputFile << "@" << to_string(tmp) << endl;
 				outputFile << "M=D" << endl;
-				writePop(tmp,true);
+				writePop(tmp, true);
 			}
 		}//symbol
 	}
 }
-void CodeWriter::writetInit(){
+void CodeWriter::writetInit() {
 	outputFile << "@256" << endl;
 	outputFile << "D=A" << endl;
 	outputFile << "@SP" << endl;
 	outputFile << "M=D" << endl;
 	writeCall("Sys.init", 0);
 }
-void CodeWriter::writeLabel(const string& label){
-	outputFile << currentFunctionName;
+void CodeWriter::writeLabel(const string& label) {
 	outputFile << "(" << label << ")" << endl;
 }
-void CodeWriter::writeGoto(const string& label){
-	outputFile << "@" << currentFunctionName << label << endl;
+void CodeWriter::writeGoto(const string& label) {
+	outputFile << "@" << label << endl;
 	outputFile << "0;JMP" << endl;
+	
 }
 void CodeWriter::writeIf(const string& label) {
 	outputFile << "@SP" << endl;
 	outputFile << "AM=M-1" << endl;
 	outputFile << "D=M" << endl;
-	outputFile << "@" << currentFunctionName << label << endl;
+	outputFile << "@" << label << endl;
 	outputFile << "D;JNE" << endl;
 }
 void CodeWriter::writeCall(const string& functionName, int numArgs) {
-	string labelName = "return-address-of-";
-	labelName.append(functionName);
+	LABEL_NUMBER++;
+	string RET = "retOf";
+	RET.append(functionName);
+	RET.append(to_string(LABEL_NUMBER));
 	//push return-address
-	outputFile << "@" << labelName << endl;
-	outputFile << "D=M" << endl;
+	outputFile << "@" << RET << endl;
+	outputFile << "D=A" << endl;
 	writePush();
 	//push LCL
 	outputFile << "@LCL" << endl;
@@ -305,27 +305,25 @@ void CodeWriter::writeCall(const string& functionName, int numArgs) {
 	outputFile << "@LCL" << endl;
 	outputFile << "M=D" << endl;
 
-	writeGoto(functionName);
 
-	writeLabel(labelName);
+	writeGoto(functionName);
+	writeLabel(RET);
 }
-void CodeWriter::writeReturn(){
-	//TODO
-	string RET = "return-address-of-";
-	RET.append(currentfunctionName);
+void CodeWriter::writeReturn() {
+	uint16_t tmp = 0x000F;
 	//FRAME = LCL
 	outputFile << "@LCL" << endl;
 	outputFile << "D=M" << endl;
 	outputFile << "@FRAME" << endl;
-	outputFile << "M=D" << endl;
+	outputFile << "M=D" << endl; 
 	//RET = *(FRAME-5)
 	outputFile << "@5" << endl;
 	outputFile << "A=D-A" << endl;
 	outputFile << "D=M" << endl;
-	outputFile << "@" << RET << endl;
+	outputFile << "@" << to_string(tmp) << endl;
 	outputFile << "M=D" << endl;
 	//*ARG = pop()
-	writePop(2, true);
+	writePop(2, true); //A=ARG  R[A]=POP()
 	//SP = ARG+1
 	outputFile << "@ARG" << endl;
 	outputFile << "D=M+1" << endl;
@@ -356,23 +354,20 @@ void CodeWriter::writeReturn(){
 	outputFile << "@LCL" << endl;
 	outputFile << "M=D" << endl;
 	//goto RET
-	writeGoto(RET);
+	outputFile << "@" << to_string(tmp) << endl;
+	outputFile << "A=M" << endl;
+	outputFile << "0;JMP" << endl;
 }
-void CodeWriter::writeFunction(const string& functionName, int numLocals){
+void CodeWriter::writeFunction(const string& functionName, int numLocals) {
 
 	writeLabel(functionName);
-	currentFunctionName = functionName;
-	currentFunctionName.append("$");
 	for (int i = 0; i < numLocals; i++)
 	{
-		outputFile << "D=0" << endl;
-		writePushPop(C_PUSH, "local", i);
+		writePushPop(C_PUSH, "constant", 0);
 	}
 
 }
-
-
-void CodeWriter::Close() 
+void CodeWriter::Close()
 {
 	outputFile.close();
 }
@@ -387,7 +382,7 @@ void CodeWriter::writePush() {
 }
 //R[address] = pop()
 //needAccessRAM = ?(@R[index]=address : @index = address)
-void CodeWriter::writePop(int index, bool needAccessRAM){
+void CodeWriter::writePop(int index, bool needAccessRAM) {
 	outputFile << "@SP" << endl;
 	outputFile << "AM=M-1" << endl;
 	outputFile << "D=M" << endl;

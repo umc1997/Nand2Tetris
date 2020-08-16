@@ -25,15 +25,17 @@ public:
 	void Close();
 
 	void writePush();
-	void writePop(int index,bool needAccessRAM);
+	void writePop(int index, bool needAccessRAM);
 
 private:
-	string outputFileName;
 	ofstream outputFile;
+	string outputFileName;
 	string currentFileName;
 	string currentCommand;
-	int LABEL_NUMBER;
-	string currentFunctionName;
+	unsigned int LABEL_NUMBER;
+
+
+
 	const int POINTER_ADDRESS = 3;
 	const int TEMP_ADDRESS = 5;
 };

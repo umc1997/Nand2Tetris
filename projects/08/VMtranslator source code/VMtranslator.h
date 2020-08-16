@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class VMtranslator 
+class VMtranslator
 {
 public:
 	VMtranslator(const string& pathName);
@@ -18,5 +18,5 @@ private:
 	string pathName;
 	string getExtension(const string& fileName);
 	string removeExtension(string& fileName);
-	
+
 };

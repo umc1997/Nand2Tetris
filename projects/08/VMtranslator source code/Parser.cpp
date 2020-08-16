@@ -1,29 +1,29 @@
 #include "Parser.h"
 
 Parser::Parser(const string& fileName)
-:commandMap({
-		{"add" ,		C_ARITHMETIC},
-		{"sub",			C_ARITHMETIC},
-		{"neg",			C_ARITHMETIC},
-		{"eq",			C_ARITHMETIC},
-		{"gt",			C_ARITHMETIC},
-		{"lt",			C_ARITHMETIC},
-		{"and",			C_ARITHMETIC},
-		{"or",			C_ARITHMETIC},
-		{"not",			C_ARITHMETIC},
-		{"push",		C_PUSH},
-		{"pop",			C_POP},
-		{"label",		C_LABEL},
-		{"goto",		C_GOTO},
-		{"if-goto",		C_IF},
-		{"function",	C_FUNCTION},
-		{"return",		C_RETURN},
-		{"call",		C_CALL}
+	:commandMap({
+			{"add" ,		C_ARITHMETIC},
+			{"sub",			C_ARITHMETIC},
+			{"neg",			C_ARITHMETIC},
+			{"eq",			C_ARITHMETIC},
+			{"gt",			C_ARITHMETIC},
+			{"lt",			C_ARITHMETIC},
+			{"and",			C_ARITHMETIC},
+			{"or",			C_ARITHMETIC},
+			{"not",			C_ARITHMETIC},
+			{"push",		C_PUSH},
+			{"pop",			C_POP},
+			{"label",		C_LABEL},
+			{"goto",		C_GOTO},
+			{"if-goto",		C_IF},
+			{"function",	C_FUNCTION},
+			{"return",		C_RETURN},
+			{"call",		C_CALL}
 		})
 {
 	inputFileName = fileName;
 	f.open(inputFileName.c_str(), ifstream::in);
-	
+
 }
 Parser::~Parser() {
 	f.close();
@@ -62,11 +62,11 @@ void Parser::advance() {
 	split(s);
 	currentCommand = s;
 }
-COMMAND Parser::commandType() const{
-	
+COMMAND Parser::commandType() const {
+
 	return commandMap.at(firstArg);
 }
-string Parser::arg1() const{
+string Parser::arg1() const {
 	if (commandType() == C_ARITHMETIC)
 		return firstArg;
 	else
