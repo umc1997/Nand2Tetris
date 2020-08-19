@@ -2,11 +2,13 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
+#include <queue>
 
 using namespace std;
 
 enum Token { KEYWORD, SYMBOL, IDENTIFIER, INT_CONST, STRING_CONST };
-enum Keyword { KCLASS, METHOD, FUNCTION, CONSTRUCTOR, INT, BOOLEAN, CHAR, VOID, VAR, STATIC, FIELD, LET, DO, IF, ELSE, WHILE, RETURN, TRUE, FALSE, K_NULL, THIS };
+enum Keyword { CLASS, METHOD, FUNCTION, CONSTRUCTOR, INT, BOOLEAN, CHAR, VOID, VAR, STATIC, FIELD, LET, DO, IF, ELSE, WHILE, RETURN, TRUE, FALSE, JACK_NULL, THIS };
 
 class JackTokenizer {
 public:
@@ -21,7 +23,20 @@ public:
 	string identifier();
 	int intVal();
 	string stringVal();
+
+	ifstream f;
+	string inputFileName;
+	string currentLine;
+	string currentTokens;
+	string currentToken;
+	bool isinProcessing;
 	
 private:
-
+	bool isOneLineComment(string& line);
+	void trimLeft(string& line);
+	void trimRight(string& line);
+	void processTokens();
+	queue<string> tokenItems;
+	unordered_map<string, Token>   TokenMap;
+	unordered_map<string, Keyword> KeywordMap;
 };

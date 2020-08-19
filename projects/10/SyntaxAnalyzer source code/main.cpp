@@ -4,10 +4,11 @@
 
 using namespace std; 
 
-int main(int argc, char* argv[])
+//int main(int argc, char* argv[])
+int main()
 {
 	string inputPathName;
-	inputPathName = argv[1];
+	inputPathName = "text.jack";//argv[1];
 
 	JackAnalyzer myAnalyzer(inputPathName);
 	myAnalyzer.analyze();
