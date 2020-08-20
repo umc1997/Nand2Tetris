@@ -11,30 +11,12 @@ void JackAnalyzer::analyze()
 	if (inputExtension == "jack")
 	{
 		//process
-		string currentInputFileName = pathName;
-		JackTokenizer t(currentInputFileName);
-		while (t.hasMoreTokens())
-		{
-			t.advance();
-			switch (t.tokenType())
-			{
-			case(KEYWORD):
-				cout << "This is keyword: " << t.currentToken << endl;
-				break;
-			case(SYMBOL):
-				cout << "This is symbol: " << t.symbol() << endl;
-				break;
-			case(IDENTIFIER):
-				cout << "This is indentifier: " << t.identifier() << endl;
-				break;
-			case(INT_CONST):
-				cout << "This is constant int: " << to_string(t.intVal()) << endl;
-				break;
-			case(STRING_CONST):
-				cout << "This is constant string: " << t.stringVal()<< endl;
-				break;
-			}
-		}
+		string InputFileName = pathName;
+		string outputFileName = removeExtension(pathName);
+		outputFileName.append(".xml");
+
+		CompilationEngine c(InputFileName,outputFileName);
+		c.CompileFile();
 	}/*
 	else if (inputExtension == "")
 	{

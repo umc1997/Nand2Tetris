@@ -25,18 +25,17 @@ public:
 	string stringVal();
 
 	ifstream f;
-	string inputFileName;
-	string currentLine;
-	string currentTokens;
 	string currentToken;
-	bool isinProcessing;
-	
+
 private:
 	bool isOneLineComment(string& line);
 	void trimLeft(string& line);
 	void trimRight(string& line);
 	void processTokens();
 	queue<string> tokenItems;
+	string currentTokens;
+	string inputFileName;
+	bool isinProcessing;
 	unordered_map<string, Token>   TokenMap;
 	unordered_map<string, Keyword> KeywordMap;
 };

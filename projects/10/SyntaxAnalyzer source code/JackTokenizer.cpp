@@ -45,8 +45,8 @@ JackTokenizer::JackTokenizer(const string& fileName)
 	})
 	,KeywordMap({
 		{"class",			CLASS},
-		{"constructor",		METHOD},
-		{"funtion",			FUNCTION},
+		{"constructor",		CONSTRUCTOR},
+		{"function",		FUNCTION},
 		{"method",			METHOD},
 		{"field",			FIELD},
 		{"static",			STATIC},
@@ -79,6 +79,7 @@ JackTokenizer::~JackTokenizer()
 
 bool JackTokenizer::hasMoreTokens()
 {
+	isinProcessing = !tokenItems.empty();
 	if (isinProcessing)
 		return true;
 	if (f.eof())
@@ -88,7 +89,6 @@ bool JackTokenizer::hasMoreTokens()
 	bool hasMoreTokens = false;
 	string s;
 	istream::streampos pos = f.tellg();
-	f.clear();
 	do
 	{
 		f >> s;
@@ -119,16 +119,12 @@ bool JackTokenizer::hasMoreTokens()
 }
 void JackTokenizer::advance()
 {
+	isinProcessing = !tokenItems.empty();
 	if (isinProcessing)
 	{
-		if (tokenItems.empty())
-			isinProcessing = false;
-		else
-		{
-			currentToken = tokenItems.front();
-			tokenItems.pop();
-			return;
-		}
+		currentToken = tokenItems.front();
+		tokenItems.pop();
+		return;	
 	}
 	string s;
 	do
@@ -206,7 +202,7 @@ void JackTokenizer::trimLeft(string& line)
 }
 void JackTokenizer::trimRight(string& line)
 {
-	const string blank = " \t\n\f\v\r;";
+	const string blank = " \t\n\f\v\r";
 	int commentPos = line.find("//");
 	if (commentPos != 0 && commentPos != string::npos)
 	{
@@ -216,35 +212,53 @@ void JackTokenizer::trimRight(string& line)
 }
 void JackTokenizer::processTokens()
 {
+	//If tokens contain " symbol , input string from file until finding the other " symbol.
+	if (currentTokens.find( '\"') != string::npos)
+	{
+		string s = "";
+		while (s.find("\"") == string::npos)
+		{
+			f >> s;
+			currentTokens.append(" ");
+			currentTokens.append(s);
+		}
+	}
+	//Check every char in currentTokens, and split them with "string" and symbols.
 	string token = "";
+	bool isinString = false;
 	for (int i = 0; i < currentTokens.size(); i++)
 	{
 		string tmp;
 		tmp += currentTokens[i]; //char to string
-		if (TokenMap.count(tmp))
+		token.append(tmp);
+
+		// Check currentTokens[i] is in string? 
+		if (tmp == "\"")
 		{
-			if (token != "")
+			if (isinString)
+			{
 				tokenItems.push(token);
+				token = "";
+				isinString = false;
+			}
+			else
+				isinString = true;
+		}
+		// If (isinString) find "symbol.
+		if (isinString)
+			continue;
+		
+		// Split tokens with symbols
+		if (TokenMap.count(tmp))
+		{	
+			if(token.substr(0, token.length() - 1) != "")
+				tokenItems.push(token.substr(0, token.length() - 1));
 			tokenItems.push(tmp);
 			token = "";
 			continue;
 		}
-		if (currentTokens[i] == '\"')
-		{
-			token.append(currentTokens.substr(i,string::npos));
-			string s = "";
-			while (s.find("\"") == string::npos)
-			{
-				f >> s;
-				currentTokens.append(s);
-				token.append(" ");
-				token.append(s.substr(0, s.find("\"")));
-			} 
-			tokenItems.push(token);
-			token = "";
-		}
-		token += currentTokens[i];
 	}
+	//If token is something, push it to tokenItems.
 	if (token != "")
 		tokenItems.push(token);
 }
