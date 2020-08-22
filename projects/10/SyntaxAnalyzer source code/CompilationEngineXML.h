@@ -7,12 +7,13 @@
 using namespace std;
 
 
-class CompilationEngine {
+class CompilationEngineXML {
 public:
-	CompilationEngine(const string& inputFileName, const string& outputFileName);
-	~CompilationEngine();
+	CompilationEngineXML(const string& inputFileName, const string& outputFileName);
+	~CompilationEngineXML();
 
 	void CompileFile();
+	void CompileFileTokens();
 	void CompileClass();
 	void CompileClassVarDec();
 	void CompileSubroutine();
@@ -34,18 +35,40 @@ public:
 	void CompileIntVal();
 	void CompileStringVal();
 	void CompileType();
-	
+	void CompileSubroutineCall();
+	void CompileSubroutineCallwithoutName();
+
 private:
 	JackTokenizer myTokenizer;
 	string inputFileName;
 	string outputFileName;
 	ofstream outputFile;
 	int tapCount;
-	
-	string tapAppend(int count);
+
+	void writeTagStart(const string& tag);
+	void writeTagEnd(const string& tag);
+	string tapAppend();
 	void writeKeyword(const string& s);
 	void writeIdentifier(const string& s);
 	void writeSymbol(const char c);
 	void writeIntVal(const int i);
 	void writeStringVal(const string& s);
+
+	bool isTerm();
+	bool isExpression();
+	bool isKeywordConstant();
+	bool isUnaryOperator();
+	bool isOperator();
+	bool isSubroutineCall();
+	bool isParentheseStart();
+	bool isParentheseEnd();
+	bool isBraceStart();
+	bool isBraceEnd();
+	bool isBracketStart();
+	bool isBracketEnd();
+	bool isComma();
+	bool isDot();
+	bool isSemiCollon();
+	bool isStatement();
+	bool isType();
 };

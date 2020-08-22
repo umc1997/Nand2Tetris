@@ -24,6 +24,7 @@ public:
 	int intVal();
 	string stringVal();
 
+	void close();
 	ifstream f;
 	string currentToken;
 
