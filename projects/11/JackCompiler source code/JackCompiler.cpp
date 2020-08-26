@@ -10,31 +10,30 @@ void JackCompiler::Compile()
     string inputExtension = getExtension(pathName);
     if (inputExtension == "jack")
     {
-        string InputFileName = pathName;
         string className = removeExtension(pathName);
         
-        CompilationEngine myComilationEngine(InputFileName, className);
+        CompilationEngine myComilationEngine(className, className);
         myComilationEngine.CompileFile();
 
     }
-    /*else if (inputExtension == "")
+    else if (inputExtension == "")
     {
         fs::path myPath(pathName);
         for (auto& i : fs::recursive_directory_iterator(myPath))
         {
-            //
-            string currentInputFileName = i.path().string();
-            if (getExtension(currentInputFileName) != "jack")
+            //"filename.ex"
+            string s = i.path().filename().string();
+            if (getExtension(s) != "jack")
                 continue;
-            string InputFileName = currentInputFileName;
-            string outputFileName = removeExtension(currentInputFileName);
-
-            outputFileName.append(".xml");
-
-            JackTokenizer myTokenizer(InputFileName);
+            //"filename"
+            string className = removeExtension(s);
+            // "folder\filename.ex"
+            string inputFileName = i.path().string();
+            CompilationEngine myComilationEngine(inputFileName, className);
+            myComilationEngine.CompileFile();
 
         }
-    }*/
+    }
 }
 
 string JackCompiler::getExtension(const string& fileName)

@@ -4,11 +4,10 @@
 
 using namespace std;
 
-//int main(int argc, char* argv[])
-int main()
+int main(int argc, char* argv[])
 {
 	string inputPathName;
-	inputPathName = "Main.jack";//argv[1];
+	inputPathName = argv[1];
 
 	JackCompiler myCompiler(inputPathName);
 	myCompiler.Compile();

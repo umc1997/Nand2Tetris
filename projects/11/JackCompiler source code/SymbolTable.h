@@ -19,6 +19,7 @@ public:
 	string TypeOf(const string& name);
 	int IndexOf(const string& name);
 	void setCurrentClassName(const string& className);
+	bool isExist(const string& name);
 private:
 	string currentClassName;
 	unordered_map<string, table> classMap;

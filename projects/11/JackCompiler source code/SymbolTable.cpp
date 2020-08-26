@@ -11,7 +11,6 @@ void SymbolTable::startSubroutine() {
 	subroutineMap.clear();
 	subroutineArgumentIndex = 0;
 	subroutineVarIndex = 0;
-	Define("this", currentClassName, ARG_R);
 }
 void SymbolTable::Define(const string& name, const string& type, Range kind) {
 	table t;
@@ -87,4 +86,8 @@ int SymbolTable::IndexOf(const string& name) {
 void SymbolTable::setCurrentClassName(const string& className)
 {
 	currentClassName = className;
+}
+bool SymbolTable::isExist(const string& name)
+{
+	return ((subroutineMap.count(name) || (classMap.count(name))));
 }

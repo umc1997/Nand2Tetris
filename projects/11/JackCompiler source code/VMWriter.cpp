@@ -1,19 +1,64 @@
 #include "VMWriter.h"
 
 
-VMWriter::VMWriter(const string& outputFileName)
-	:outputFileName(outputFileName) {
-	this->outputFileName = outputFileName + ".vm";
-	outputFile.open(this->outputFileName, ios::out);
+VMWriter::VMWriter(const string& inputFileName)
+	:inputFileName(inputFileName) {
+	outputFileName = inputFileName.substr(0, inputFileName.find_last_of("."));
+	outputFileName = outputFileName + ".vm";
+	outputFile.open(outputFileName, ios::out);
 }
 void VMWriter::writePush(const string& segment, int Index) {
 	outputFile << "push ";
 	outputFile << segment << " ";
 	outputFile << to_string(Index) << endl;
 }
+void VMWriter::writePush(Range r, int Index) {
+	outputFile << "push ";
+	switch (r)
+	{
+	case(ARG_R):
+		outputFile << "argument " ;
+		break;
+	case(VAR_R):
+		outputFile << "local ";
+		break;
+	case(STATIC_R):
+		//TODO
+		outputFile << "static ";
+		break;
+	case(FIELD_R):
+		outputFile << "this ";
+		break;
+	default://error
+		break;
+	}
+	outputFile << to_string(Index) << endl;
+}
 void VMWriter::writePop(const string& segment, int Index) {
 	outputFile << "pop ";
 	outputFile << segment << " ";
+	outputFile << to_string(Index) << endl;
+}
+void VMWriter::writePop(Range r, int Index) {
+	outputFile << "pop ";
+	switch (r)
+	{
+	case(ARG_R):
+		outputFile << "argument ";
+		break;
+	case(VAR_R):
+		outputFile << "local ";
+		break;
+	case(STATIC_R):
+		//TODO
+		outputFile << "static "; 
+		break;
+	case(FIELD_R):
+		outputFile << "this ";
+		break;
+	default://error
+		break;
+	}
 	outputFile << to_string(Index) << endl;
 }
 void VMWriter::writerArithmetic(const string& command) {

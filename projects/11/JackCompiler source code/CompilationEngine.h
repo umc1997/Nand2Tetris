@@ -29,7 +29,8 @@ public:
 	void CompileIf();
 	void CompileExpression();
 	void CompileTerm();
-	void CompileExpressionList();
+	int CompileExpressionList();
+	void CompileKeywordConstant();
 
 	Keyword CompileKeyword();
 	string CompileIdentifier();
@@ -37,8 +38,8 @@ public:
 	string CompileIntVal();
 	string CompileStringVal();
 	string CompileType();
-	string CompileSubroutineCall();
-	string CompileSubroutineCallwithoutName();
+	void CompileSubroutineCall();
+	void CompileSubroutineCallwithoutName(const string& name);
 
 private:
 	JackTokenizer myTokenizer;
@@ -47,7 +48,8 @@ private:
 	string inputFileName;
 	string className;
 	ofstream outputFile;
-	int tapCount;
+	int IF_LABEL_NUMBER;
+	int WHILE_LABEL_NUMBER;
 
 	bool isTerm();
 	bool isExpression();
