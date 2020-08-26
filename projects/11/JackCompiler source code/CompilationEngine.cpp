@@ -18,7 +18,7 @@ CompilationEngine::~CompilationEngine()
 void CompilationEngine::CompileFile()
 {
     if (!myTokenizer.hasMoreTokens()) throw("Error:It is empty file.");
-    myTokenizer.advance();
+    advance();
     CompileClass();
 }
 void CompilationEngine::CompileClass()
@@ -228,13 +228,13 @@ void CompilationEngine::CompileLet()
     }
     //=
     CompileSymbol();
-    //expression  TODO
+    //expression 
     CompileExpression();
 
     if (!isSemiCollon()) throw("Error: Syntax Error");
     //;
     CompileSymbol();
-    //write varName(+expression1) = expression2 
+    //varName(+expression1) = expression2 
     if (isArray)
     {
         myVMWriter.writePop("temp", 0);
@@ -475,7 +475,7 @@ void  CompilationEngine::CompileKeywordConstant()
     default:
         break;
     }
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
 }
 
 string CompilationEngine::CompileType()
@@ -494,7 +494,7 @@ string CompilationEngine::CompileType()
     else if (myTokenizer.tokenType() == IDENTIFIER)
         s = myTokenizer.identifier();
     else; // error
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return s;
 }
 void CompilationEngine::CompileSubroutineCall()
@@ -545,27 +545,27 @@ Keyword CompilationEngine::CompileKeyword() {
     
     if (myTokenizer.tokenType() != KEYWORD) throw ("Error: Syntax Error: Keyword.");
     Keyword k = myTokenizer.keyword();
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return k;
 }
 string CompilationEngine::CompileIdentifier() {
     if (myTokenizer.tokenType() != IDENTIFIER) throw ("Error: Syntax Error: Identifier.");
     string s = myTokenizer.identifier();
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return s;
 }
 string CompilationEngine::CompileSymbol() {
     if (myTokenizer.tokenType() != SYMBOL) throw ("Error: Syntax Error: Symbol.");
     string s = "";
     s += (myTokenizer.symbol());
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return s;
 }
 string CompilationEngine::CompileIntVal() {
     if (myTokenizer.tokenType() != INT_CONST) throw ("Error: Syntax Error: Integer.");
     string s = to_string(myTokenizer.intVal());
     myVMWriter.writePush("constant", myTokenizer.intVal());
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return s;
 }
 string CompilationEngine::CompileStringVal() {
@@ -580,7 +580,7 @@ string CompilationEngine::CompileStringVal() {
         myVMWriter.writePush("constant" , ascii);
         myVMWriter.writeCall("String.appendChar", 2);
     }
-    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
+    advance();
     return s;
 }
 
@@ -689,5 +689,5 @@ bool CompilationEngine::isType() {
 }
 void CompilationEngine::advance()
 {
-    myTokenizer.advance();
+    if (myTokenizer.hasMoreTokens()) myTokenizer.advance();
 }

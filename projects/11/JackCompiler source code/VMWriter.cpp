@@ -23,7 +23,6 @@ void VMWriter::writePush(Range r, int Index) {
 		outputFile << "local ";
 		break;
 	case(STATIC_R):
-		//TODO
 		outputFile << "static ";
 		break;
 	case(FIELD_R):
@@ -50,7 +49,6 @@ void VMWriter::writePop(Range r, int Index) {
 		outputFile << "local ";
 		break;
 	case(STATIC_R):
-		//TODO
 		outputFile << "static "; 
 		break;
 	case(FIELD_R):
