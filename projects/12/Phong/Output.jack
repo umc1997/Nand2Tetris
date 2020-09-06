@@ -305,7 +305,7 @@ class Output {
      *  and advances the cursor appropriately. */
     function void printString(String s) {
 		var int ptr, length;
-		let length = String.length(s);
+		let length = s.length();
 		while(ptr < length)
 		{
 			do Output.printChar(s.charAt(ptr));
